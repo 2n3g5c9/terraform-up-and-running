@@ -7,3 +7,9 @@
 
 # .tfvars files
 *.tfvars
+
+# GCP credentials
+keyfile.json
+
+# macOS specific files
+.DS_Store
