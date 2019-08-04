@@ -4,19 +4,35 @@
 
 <br />
 
-<div align="center">A GCP approach to "Terraform: Up and Running" published by O'Reilly</div>
+<div align="center">AWS/GCP provisioned with "Terraform: Up and Running" published by O'Reilly</div>
 
 <br />
 
 ## Prerequisites
 
-To run the examples in the repository, you need to have a valid GCP keyfile for a role with the right level of permissions. Specify the path to that keyfile via the environment variable `GOOGLE_CLOUD_KEYFILE_JSON`:
+### Amazon Web Services
+To run the AWS related examples in the repository, you need to have your AWS credentials accessible through environment variables. Specify those in `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`:
+
+```bash
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+export AWS_DEFAULT_REGION="us-east-1"
+```
+
+### Google Cloud Platform
+To run the GCP related examples in the repository, you need to have a valid GCP keyfile for a role with the right level of permissions. Specify the path to that keyfile via the environment variable `GOOGLE_CLOUD_KEYFILE_JSON`:
 
 ```bash
 export GOOGLE_CLOUD_KEYFILE_JSON=./keyfile.json
 ```
 
 ## How to use
+
+To preview incoming changes to the infrastructure, run the following command:
+
+```bash
+terraform plan
+```
 
 To provision the infrastructure, simply apply the Terraform configuration:
 
