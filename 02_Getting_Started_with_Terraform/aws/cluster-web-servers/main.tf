@@ -1,22 +1,24 @@
+terraform {
+  required_version = ">= 0.12, < 0.13"
+}
+
 provider "aws" {
-  region = "us-east-1"
+  region  = "us-east-1"
+  version = "~> 3.0"
 }
 
-data "aws_availability_zones" "all" {}
-
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  default     = 8080
+data "aws_vpc" "default" {
+  default = true
 }
 
-output "elb_dns_name" {
-  value = "${aws_elb.example.dns_name}"
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
 }
 
 resource "aws_launch_configuration" "example" {
-  image_id        = "ami-40d28157"
-  instance_type   = "t2.micro"
-  security_groups = ["${aws_security_group.instance.id}"]
+  image_id        = "ami-0d5ae5525eb033d0a"
+  instance_type   = "t3.nano"
+  security_groups = [aws_security_group.instance.id]
 
   user_data = <<-EOF
             #!/bin/bash
@@ -29,12 +31,29 @@ resource "aws_launch_configuration" "example" {
   }
 }
 
+resource "aws_autoscaling_group" "example" {
+  launch_configuration = aws_launch_configuration.example.name
+  vpc_zone_identifier  = data.aws_subnet_ids.default.ids
+
+  target_group_arns = [aws_lb.example.name]
+  health_check_type = "ELB"
+
+  min_size = 2
+  max_size = 10
+
+  tag {
+    key                 = "Name"
+    value               = "terraform-example-asg"
+    propagate_at_launch = true
+  }
+}
+
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
 
   ingress {
-    from_port   = "${var.server_port}"
-    to_port     = "${var.server_port}"
+    from_port   = var.server_port
+    to_port     = var.server_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -44,46 +63,66 @@ resource "aws_security_group" "instance" {
   }
 }
 
-resource "aws_autoscaling_group" "example" {
-  launch_configuration = "${aws_launch_configuration.example.id}"
-  availability_zones   = "${data.aws_availability_zones.all.names}"
+resource "aws_lb" "example" {
+  name = "terraform-example-lb"
 
-  load_balancers    = ["${aws_elb.example.name}"]
-  health_check_type = "ELB"
-
-  min_size = 2
-  max_size = 10
-
-  tag {
-    key                 = "Name"
-    value               = "terraform-asg-example"
-    propagate_at_launch = true
-  }
+  load_balancer_type = "application"
+  subnets            = data.aws_subnet_ids.default.ids
+  security_groups    = [aws_security_group.alb.id]
 }
 
-resource "aws_elb" "example" {
-  name               = "terraform-asg-example"
-  availability_zones = "${data.aws_availability_zones.all.names}"
-  security_groups    = ["${aws_security_group.elb.id}"]
+resource "aws_lb_target_group" "asg" {
 
-  listener {
-    lb_port           = 80
-    lb_protocol       = "http"
-    instance_port     = "${var.server_port}"
-    instance_protocol = "http"
-  }
+  name = "terraform-example-tg"
+
+  port     = var.server_port
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.default.id
 
   health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 15
+    timeout             = 3
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    timeout             = 3
-    interval            = 30
-    target              = "HTTP:${var.server_port}/"
   }
 }
 
-resource "aws_security_group" "elb" {
-  name = "terraform-example-elb"
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404: page not found"
+      status_code  = 404
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "asg" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+
+  condition {
+    field  = "path-pattern"
+    values = ["*"]
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.asg.arn
+  }
+}
+
+resource "aws_security_group" "alb" {
+  name = "terraform-example-alb"
 
   ingress {
     from_port   = 80

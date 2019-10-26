@@ -13,3 +13,6 @@ keyfile.json
 
 # macOS specific files
 .DS_Store
+
+# Intellij IDEA configuration files
+.idea/
