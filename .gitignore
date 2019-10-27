@@ -8,6 +8,9 @@
 # .tfvars files
 *.tfvars
 
+# .tfplan files
+*.tfplan
+
 # GCP credentials
 keyfile.json
 

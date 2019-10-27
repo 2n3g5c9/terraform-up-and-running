@@ -7,6 +7,16 @@ provider "aws" {
   version = "~> 2.0"
 }
 
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = var.db_remote_state_bucket
+    key    = var.db_remote_state_key
+    region = "us-east-1"
+  }
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -20,14 +30,20 @@ resource "aws_launch_configuration" "example" {
   instance_type   = "t3.nano"
   security_groups = [aws_security_group.instance.id]
 
-  user_data = <<-EOF
-            #!/bin/bash
-            echo "Hello, World" > index.html
-            nohup busybox httpd -f -p "${var.server_port}" &
-            EOF
+  user_data = data.template_file.user_data.rendered
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+data "template_file" "user_data" {
+  template = file("user-data.sh")
+
+  vars = {
+    server_port = var.server_port
+    db_address  = data.terraform_remote_state.db.outputs.address
+    db_port     = data.terraform_remote_state.db.outputs.port
   }
 }
 
@@ -72,7 +88,6 @@ resource "aws_lb" "example" {
 }
 
 resource "aws_lb_target_group" "asg" {
-
   name = var.alb_name
 
   port     = var.server_port
@@ -122,7 +137,7 @@ resource "aws_lb_listener_rule" "asg" {
 }
 
 resource "aws_security_group" "alb" {
-  name = "terraform-example-alb"
+  name = var.alb_security_group_name
 
   ingress {
     from_port   = 80

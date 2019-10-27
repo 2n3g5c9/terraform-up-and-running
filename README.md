@@ -31,13 +31,13 @@ export GOOGLE_CLOUD_KEYFILE_JSON=./keyfile.json
 To preview incoming changes to the infrastructure, run the following command:
 
 ```bash
-terraform plan
+terraform plan -out my.tfplan
 ```
 
 To provision the infrastructure, simply apply the Terraform configuration:
 
 ```bash
-terraform apply
+terraform apply my.tfplan
 ```
 
 To destroy the provisioned infrastructure, run the following command:

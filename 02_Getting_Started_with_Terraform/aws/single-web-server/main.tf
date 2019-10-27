@@ -4,7 +4,7 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
-  version = "~> 3.0"
+  version = "~> 2.0"
 }
 
 resource "aws_instance" "example" {
@@ -24,7 +24,7 @@ resource "aws_instance" "example" {
 }
 
 resource "aws_security_group" "instance" {
-  name = "terraform-example-instance"
+  name = var.security_group_name
 
   ingress {
     from_port   = var.server_port

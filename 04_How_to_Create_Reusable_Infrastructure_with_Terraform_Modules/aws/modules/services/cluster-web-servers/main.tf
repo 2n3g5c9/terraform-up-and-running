@@ -7,6 +7,16 @@ provider "aws" {
   version = "~> 2.0"
 }
 
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/data-stores/mysql/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -20,14 +30,20 @@ resource "aws_launch_configuration" "example" {
   instance_type   = "t3.nano"
   security_groups = [aws_security_group.instance.id]
 
-  user_data = <<-EOF
-            #!/bin/bash
-            echo "Hello, World" > index.html
-            nohup busybox httpd -f -p "${var.server_port}" &
-            EOF
+  user_data = data.template_file.user_data.rendered
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+data "template_file" "user_data" {
+  template = file("user-data.sh")
+
+  vars = {
+    server_port = var.server_port
+    db_address  = data.terraform_remote_state.db.outputs.address
+    db_port     = data.terraform_remote_state.db.outputs.port
   }
 }
 
@@ -49,7 +65,7 @@ resource "aws_autoscaling_group" "example" {
 }
 
 resource "aws_security_group" "instance" {
-  name = var.instance_security_group_name
+  name = "terraform-example-instance"
 
   ingress {
     from_port   = var.server_port
@@ -64,7 +80,7 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_lb" "example" {
-  name = var.alb_name
+  name = "terraform-example-lb"
 
   load_balancer_type = "application"
   subnets            = data.aws_subnet_ids.default.ids
@@ -72,8 +88,7 @@ resource "aws_lb" "example" {
 }
 
 resource "aws_lb_target_group" "asg" {
-
-  name = var.alb_name
+  name = "terraform-example-tg"
 
   port     = var.server_port
   protocol = "HTTP"
