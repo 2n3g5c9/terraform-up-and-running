@@ -8,7 +8,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "single_web_server" {
-  ami                    = "ami-0d5ae5525eb033d0a"
+  ami                    = "ami-0e2512bd9da751ea8"
   instance_type          = "t3.nano"
   vpc_security_group_ids = [aws_security_group.single_web_server.id]
 

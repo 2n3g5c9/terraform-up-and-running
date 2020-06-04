@@ -16,7 +16,7 @@ data "aws_subnet_ids" "default" {
 }
 
 resource "aws_launch_configuration" "example" {
-  image_id        = "ami-0d5ae5525eb033d0a"
+  image_id        = "ami-0e2512bd9da751ea8"
   instance_type   = "t3.nano"
   security_groups = [aws_security_group.instance.id]
 
