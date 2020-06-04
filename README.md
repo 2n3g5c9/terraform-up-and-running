@@ -4,23 +4,17 @@
 
 <br />
 
-<div align="center">AWS/GCP provisioned with "Terraform: Up and Running" published by O'Reilly</div>
+<div align="center">AWS & GCP examples from "Terraform: Up and Running" published by O'Reilly</div>
 
 <br />
 
 ## Prerequisites
 
 ### Amazon Web Services
-To run the AWS related examples in the repository, you need to have your AWS credentials accessible through environment variables. Specify those in `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`:
-
-```bash
-export AWS_ACCESS_KEY_ID=""
-export AWS_SECRET_ACCESS_KEY=""
-export AWS_DEFAULT_REGION="us-east-1"
-```
+To run the AWS related examples in this repository, you need to have your AWS user credentials accessible locally, either in `~/.aws`, or through environment variables. 
 
 ### Google Cloud Platform
-To run the GCP related examples in the repository, you need to have a valid GCP keyfile for a role with the right level of permissions. Specify the path to that keyfile via the environment variable `GOOGLE_CLOUD_KEYFILE_JSON`:
+To run the GCP related examples in the repository, you need to have a valid GCP keyfile for a service account with the right level of permissions. Specify the path to that keyfile via the environment variable `GOOGLE_CLOUD_KEYFILE_JSON`:
 
 ```bash
 export GOOGLE_CLOUD_KEYFILE_JSON=./keyfile.json
@@ -31,13 +25,13 @@ export GOOGLE_CLOUD_KEYFILE_JSON=./keyfile.json
 To preview incoming changes to the infrastructure, run the following command:
 
 ```bash
-terraform plan -out my.tfplan
+terraform plan -out terraform.tfplan
 ```
 
 To provision the infrastructure, simply apply the Terraform configuration:
 
 ```bash
-terraform apply my.tfplan
+terraform apply terraform.tfplan
 ```
 
 To destroy the provisioned infrastructure, run the following command:
