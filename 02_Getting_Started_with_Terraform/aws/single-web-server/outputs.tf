@@ -1,4 +1,4 @@
 output "public_ip" {
-	value       = aws_instance.example.public_ip
+	value       = aws_instance.single_web_server.public_ip
 	description = "The public IP address of the web server."
 }

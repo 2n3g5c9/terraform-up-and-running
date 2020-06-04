@@ -7,11 +7,11 @@ provider "aws" {
   version = "~> 2.0"
 }
 
-resource "aws_instance" "example" {
+resource "aws_instance" "single_server" {
   ami           = "ami-0d5ae5525eb033d0a"
   instance_type = "t3.nano"
 
   tags = {
-    Name = "terraform-example"
+    Name = "single-server"
   }
 }

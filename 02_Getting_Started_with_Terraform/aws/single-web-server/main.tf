@@ -7,10 +7,10 @@ provider "aws" {
   version = "~> 2.0"
 }
 
-resource "aws_instance" "example" {
+resource "aws_instance" "single_web_server" {
   ami                    = "ami-0d5ae5525eb033d0a"
   instance_type          = "t3.nano"
-  vpc_security_group_ids = [aws_security_group.instance.id]
+  vpc_security_group_ids = [aws_security_group.single_web_server.id]
 
   user_data = <<-EOF
             #!/bin/bash
@@ -19,11 +19,11 @@ resource "aws_instance" "example" {
             EOF
 
   tags = {
-    Name = "terraform-example"
+    Name = "single-web-server"
   }
 }
 
-resource "aws_security_group" "instance" {
+resource "aws_security_group" "single_web_server" {
   name = var.security_group_name
 
   ingress {
