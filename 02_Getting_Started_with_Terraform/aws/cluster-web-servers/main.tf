@@ -15,10 +15,10 @@ data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
-resource "aws_launch_configuration" "example" {
+resource "aws_launch_configuration" "cluster_web_servers" {
   image_id        = "ami-0e2512bd9da751ea8"
   instance_type   = "t3.nano"
-  security_groups = [aws_security_group.instance.id]
+  security_groups = [aws_security_group.cluster_web_servers.id]
 
   user_data = <<-EOF
             #!/bin/bash
@@ -31,11 +31,11 @@ resource "aws_launch_configuration" "example" {
   }
 }
 
-resource "aws_autoscaling_group" "example" {
-  launch_configuration = aws_launch_configuration.example.name
+resource "aws_autoscaling_group" "cluster_web_servers" {
+  launch_configuration = aws_launch_configuration.cluster_web_servers.name
   vpc_zone_identifier  = data.aws_subnet_ids.default.ids
 
-  target_group_arns = [aws_lb_target_group.asg.arn]
+  target_group_arns = [aws_lb_target_group.cluster_web_servers_asg.arn]
   health_check_type = "ELB"
 
   min_size = 2
@@ -43,12 +43,12 @@ resource "aws_autoscaling_group" "example" {
 
   tag {
     key                 = "Name"
-    value               = "terraform-example-asg"
+    value               = "cluster-web-servers-asg"
     propagate_at_launch = true
   }
 }
 
-resource "aws_security_group" "instance" {
+resource "aws_security_group" "cluster_web_servers" {
   name = var.instance_security_group_name
 
   ingress {
@@ -63,16 +63,15 @@ resource "aws_security_group" "instance" {
   }
 }
 
-resource "aws_lb" "example" {
+resource "aws_lb" "cluster_web_servers" {
   name = var.alb_name
 
   load_balancer_type = "application"
   subnets            = data.aws_subnet_ids.default.ids
-  security_groups    = [aws_security_group.alb.id]
+  security_groups    = [aws_security_group.cluster_web_servers_alb.id]
 }
 
-resource "aws_lb_target_group" "asg" {
-
+resource "aws_lb_target_group" "cluster_web_servers_asg" {
   name = var.alb_name
 
   port     = var.server_port
@@ -90,8 +89,8 @@ resource "aws_lb_target_group" "asg" {
   }
 }
 
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.example.arn
+resource "aws_lb_listener" "cluster_web_servers_http" {
+  load_balancer_arn = aws_lb.cluster_web_servers.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -106,23 +105,24 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-resource "aws_lb_listener_rule" "asg" {
-  listener_arn = aws_lb_listener.http.arn
+resource "aws_lb_listener_rule" "cluster_web_servers_asg" {
+  listener_arn = aws_lb_listener.cluster_web_servers_http.arn
   priority     = 100
 
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.asg.arn
+    target_group_arn = aws_lb_target_group.cluster_web_servers_asg.arn
   }
 }
 
-resource "aws_security_group" "alb" {
-  name = "terraform-example-alb"
+resource "aws_security_group" "cluster_web_servers_alb" {
+  name = "cluster-web-servers-alb-sg"
 
   ingress {
     from_port   = 80
