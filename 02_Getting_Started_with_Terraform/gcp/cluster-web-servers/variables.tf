@@ -6,6 +6,5 @@ variable "server_port" {
 variable "firewall_name" {
   description = "The name of the firewall."
   type        = string
-  default     = "single-web-server-fw"
+  default     = "cluster-web-servers-fw"
 }
-

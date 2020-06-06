@@ -7,7 +7,7 @@ provider "aws" {
   version = "~> 2.0"
 }
 
-resource "aws_instance" "single_server" {
+resource "aws_instance" "this" {
   ami           = "ami-0e2512bd9da751ea8"
   instance_type = "t3.nano"
 

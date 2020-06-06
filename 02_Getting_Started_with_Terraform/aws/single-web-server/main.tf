@@ -7,10 +7,10 @@ provider "aws" {
   version = "~> 2.0"
 }
 
-resource "aws_instance" "single_web_server" {
+resource "aws_instance" "this" {
   ami                    = "ami-0e2512bd9da751ea8"
   instance_type          = "t3.nano"
-  vpc_security_group_ids = [aws_security_group.single_web_server.id]
+  vpc_security_group_ids = [aws_security_group.this.id]
 
   user_data = <<-EOF
             #!/bin/bash
@@ -23,7 +23,7 @@ resource "aws_instance" "single_web_server" {
   }
 }
 
-resource "aws_security_group" "single_web_server" {
+resource "aws_security_group" "this" {
   name = var.security_group_name
 
   ingress {

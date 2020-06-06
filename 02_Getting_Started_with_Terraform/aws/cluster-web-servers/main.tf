@@ -15,10 +15,10 @@ data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
-resource "aws_launch_configuration" "cluster_web_servers" {
+resource "aws_launch_configuration" "this" {
   image_id        = "ami-0e2512bd9da751ea8"
   instance_type   = "t3.nano"
-  security_groups = [aws_security_group.cluster_web_servers.id]
+  security_groups = [aws_security_group.this.id]
 
   user_data = <<-EOF
             #!/bin/bash
@@ -31,11 +31,11 @@ resource "aws_launch_configuration" "cluster_web_servers" {
   }
 }
 
-resource "aws_autoscaling_group" "cluster_web_servers" {
-  launch_configuration = aws_launch_configuration.cluster_web_servers.name
+resource "aws_autoscaling_group" "this" {
+  launch_configuration = aws_launch_configuration.this.name
   vpc_zone_identifier  = data.aws_subnet_ids.default.ids
 
-  target_group_arns = [aws_lb_target_group.cluster_web_servers_asg.arn]
+  target_group_arns = [aws_lb_target_group.http.arn]
   health_check_type = "ELB"
 
   min_size = 2
@@ -48,7 +48,7 @@ resource "aws_autoscaling_group" "cluster_web_servers" {
   }
 }
 
-resource "aws_security_group" "cluster_web_servers" {
+resource "aws_security_group" "this" {
   name = var.instance_security_group_name
 
   ingress {
@@ -63,7 +63,7 @@ resource "aws_security_group" "cluster_web_servers" {
   }
 }
 
-resource "aws_lb" "cluster_web_servers" {
+resource "aws_lb" "http" {
   name = var.alb_name
 
   load_balancer_type = "application"
@@ -71,7 +71,7 @@ resource "aws_lb" "cluster_web_servers" {
   security_groups    = [aws_security_group.cluster_web_servers_alb.id]
 }
 
-resource "aws_lb_target_group" "cluster_web_servers_asg" {
+resource "aws_lb_target_group" "http" {
   name = var.alb_name
 
   port     = var.server_port
@@ -89,8 +89,8 @@ resource "aws_lb_target_group" "cluster_web_servers_asg" {
   }
 }
 
-resource "aws_lb_listener" "cluster_web_servers_http" {
-  load_balancer_arn = aws_lb.cluster_web_servers.arn
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.http.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -105,8 +105,8 @@ resource "aws_lb_listener" "cluster_web_servers_http" {
   }
 }
 
-resource "aws_lb_listener_rule" "cluster_web_servers_asg" {
-  listener_arn = aws_lb_listener.cluster_web_servers_http.arn
+resource "aws_lb_listener_rule" "http" {
+  listener_arn = aws_lb_listener.http.arn
   priority     = 100
 
   condition {
@@ -117,7 +117,7 @@ resource "aws_lb_listener_rule" "cluster_web_servers_asg" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.cluster_web_servers_asg.arn
+    target_group_arn = aws_lb_target_group.http.arn
   }
 }
 

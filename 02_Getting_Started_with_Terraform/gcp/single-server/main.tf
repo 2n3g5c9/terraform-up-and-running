@@ -4,13 +4,13 @@ provider "google" {
   zone    = "us-east1-b"
 }
 
-resource "google_compute_instance" "single_server" {
+resource "google_compute_instance" "this" {
   name         = "single-server"
-  machine_type = "f1-micro"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-minimal-2004-lts"
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
     }
   }
 
@@ -18,4 +18,3 @@ resource "google_compute_instance" "single_server" {
     network       = "default"
   }
 }
-
