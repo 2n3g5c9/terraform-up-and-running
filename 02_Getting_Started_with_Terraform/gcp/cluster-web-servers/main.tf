@@ -1,3 +1,10 @@
+locals {
+  service = "cluster-web-servers"
+
+  image        = "ubuntu-os-cloud/ubuntu-2004-lts"
+  machine_type = "e2-micro"
+}
+
 provider "google" {
   project = "terraform-up-and-running"
   region  = "us-east1"
@@ -5,14 +12,14 @@ provider "google" {
 }
 
 resource "google_compute_instance_template" "this" {
-  name        = "cluster-web-servers-template"
+  name        = "${local.service}-tpl"
   description = "Template for the instances in the group of web servers"
 
-  machine_type   = "e2-micro"
+  machine_type   = local.machine_type
   can_ip_forward = false
 
   disk {
-    source_image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    source_image = local.image
   }
 
   network_interface {
@@ -24,10 +31,14 @@ resource "google_compute_instance_template" "this" {
                             echo "Hello, World" > index.html
                             nohup busybox httpd -f -p "${var.server_port}" &
                             EOF
+
+  labels = {
+    service = local.service
+  }
 }
 
 resource "google_compute_http_health_check" "this" {
-  name        = "cluster-web-servers-hc"
+  name        = "${local.service}-hc"
   description = "Health checks on port 8080 of the instances in the group of web servers"
 
   request_path = "/"
@@ -40,7 +51,7 @@ resource "google_compute_http_health_check" "this" {
 }
 
 resource "google_compute_target_pool" "this" {
-  name        = "cluster-web-servers-target"
+  name        = "${local.service}-tp"
   description = "Pool of web servers"
 
   health_checks = [
@@ -49,7 +60,7 @@ resource "google_compute_target_pool" "this" {
 }
 
 resource "google_compute_instance_group_manager" "this" {
-  name        = "cluster-web-servers-group"
+  name        = "${local.service}-gm"
   description = "Group manager of web servers"
 
   base_instance_name = "web-server"
@@ -72,7 +83,7 @@ resource "google_compute_instance_group_manager" "this" {
 }
 
 resource "google_compute_autoscaler" "this" {
-  name        = "cluster-web-servers-as"
+  name        = "${local.service}-as"
   description = "Autoscaling policy for web servers"
 
   target = google_compute_instance_group_manager.this.id
@@ -89,7 +100,7 @@ resource "google_compute_autoscaler" "this" {
 }
 
 resource "google_compute_backend_service" "this" {
-  name        = "cluster-web-servers-backend"
+  name        = "${local.service}-backend"
   description = "Pool of web servers"
 
   backend {
@@ -102,26 +113,26 @@ resource "google_compute_backend_service" "this" {
 }
 
 resource "google_compute_address" "this" {
-  name        = "cluster-web-servers-address"
-  description = "IP address of the cluster-web-servers Load Balancer"
+  name        = "${local.service}-address"
+  description = "IP address of the Load Balancer"
 
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
 }
 
 resource "google_compute_url_map" "this" {
-  name            = "cluster-web-servers-url-map"
+  name            = "${local.service}-um"
   default_service = google_compute_backend_service.this.id
 }
 
 resource "google_compute_target_http_proxy" "this" {
-  name    = "cluster-web-servers-proxy"
+  name    = "${local.service}-proxy"
   url_map = google_compute_url_map.this.id
 }
 
 resource "google_compute_forwarding_rule" "this" {
-  name        = "cluster-web-servers-rule"
-  description = "Forwarding rule for the load balancer on web servers"
+  name        = "${local.service}-rule"
+  description = "Forwarding rule for the Load Balancer"
 
   ip_address            = google_compute_address.this.address
   ip_protocol           = "TCP"
@@ -133,7 +144,7 @@ resource "google_compute_forwarding_rule" "this" {
 }
 
 resource "google_compute_firewall" "this" {
-  name        = var.firewall_name
+  name        = "${local.service}-fw"
   description = "Allows TCP inbound traffic on port ${var.server_port}"
 
   network = "default"
@@ -145,4 +156,3 @@ resource "google_compute_firewall" "this" {
 
   source_ranges = ["${google_compute_address.this.address}/32", "130.211.0.0/22", "35.191.0.0/16"]
 }
-

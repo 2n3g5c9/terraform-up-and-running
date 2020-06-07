@@ -1,3 +1,10 @@
+locals {
+  service = "cluster-web-servers"
+
+  ami           = "ami-0e2512bd9da751ea8" // ubuntu 20.04 LTS
+  instance_type = "t3.nano"
+}
+
 terraform {
   required_version = ">= 0.12, < 0.13"
 }
@@ -16,8 +23,8 @@ data "aws_subnet_ids" "default" {
 }
 
 resource "aws_launch_configuration" "this" {
-  image_id        = "ami-0e2512bd9da751ea8"
-  instance_type   = "t3.nano"
+  image_id        = local.ami
+  instance_type   = local.instance_type
   security_groups = [aws_security_group.this.id]
 
   user_data = <<-EOF
@@ -43,36 +50,47 @@ resource "aws_autoscaling_group" "this" {
 
   tag {
     key                 = "Name"
-    value               = "cluster-web-servers-asg"
+    value               = "${local.service}-asg"
     propagate_at_launch = true
   }
 }
 
 resource "aws_security_group" "this" {
-  name = var.instance_security_group_name
+  name        = "${local.service}-sg"
+  description = "Allows HTTP traffic on port ${var.server_port} from the LB"
 
   ingress {
-    from_port   = var.server_port
-    to_port     = var.server_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = var.server_port
+    to_port         = var.server_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = {
+    Name    = "${local.service}-sg"
+    service = local.service
+  }
 }
 
 resource "aws_lb" "http" {
-  name = var.alb_name
+  name = "${local.service}-alb"
 
   load_balancer_type = "application"
   subnets            = data.aws_subnet_ids.default.ids
-  security_groups    = [aws_security_group.cluster_web_servers_alb.id]
+  security_groups    = [aws_security_group.alb.id]
+
+  tags = {
+    Name    = "${local.service}-alb"
+    service = local.service
+  }
 }
 
 resource "aws_lb_target_group" "http" {
-  name = var.alb_name
+  name = "${local.service}-tg"
 
   port     = var.server_port
   protocol = "HTTP"
@@ -86,6 +104,11 @@ resource "aws_lb_target_group" "http" {
     timeout             = 3
     healthy_threshold   = 2
     unhealthy_threshold = 2
+  }
+
+  tags = {
+    Name    = "${local.service}-tg"
+    service = local.service
   }
 }
 
@@ -121,8 +144,9 @@ resource "aws_lb_listener_rule" "http" {
   }
 }
 
-resource "aws_security_group" "cluster_web_servers_alb" {
-  name = "cluster-web-servers-alb-sg"
+resource "aws_security_group" "alb" {
+  name        = "${local.service}-alb-sg"
+  description = "Allows HTTP traffic on port 80 from all sources"
 
   ingress {
     from_port   = 80
@@ -136,5 +160,10 @@ resource "aws_security_group" "cluster_web_servers_alb" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${local.service}-alb-sg"
+    service = local.service
   }
 }

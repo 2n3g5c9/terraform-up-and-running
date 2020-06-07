@@ -1,3 +1,3 @@
-//output "alb_dns_name" {
-//  value = aws_lb.cluster_web_servers.dns_name
-//}
+output "lb_ip" {
+  value = google_compute_address.this.address
+}

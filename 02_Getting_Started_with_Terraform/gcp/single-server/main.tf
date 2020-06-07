@@ -1,3 +1,10 @@
+locals {
+  service = "single-server"
+
+  image        = "ubuntu-os-cloud/ubuntu-2004-lts"
+  machine_type = "e2-micro"
+}
+
 provider "google" {
   project = "terraform-up-and-running"
   region  = "us-east1"
@@ -5,16 +12,20 @@ provider "google" {
 }
 
 resource "google_compute_instance" "this" {
-  name         = "single-server"
-  machine_type = "e2-micro"
+  name         = local.service
+  machine_type = local.machine_type
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      image = local.image
     }
   }
 
   network_interface {
-    network       = "default"
+    network = "default"
+  }
+
+  labels = {
+    service = local.service
   }
 }
