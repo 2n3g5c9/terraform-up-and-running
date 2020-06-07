@@ -1,3 +1,10 @@
+locals {
+  service = "cluster-web-servers"
+
+  ami           = "ami-0e2512bd9da751ea8" // ubuntu 20.04 LTS
+  instance_type = "t3.nano"
+}
+
 terraform {
   required_version = ">= 0.12, < 0.13"
 }
@@ -7,13 +14,22 @@ provider "aws" {
   version = "~> 2.0"
 }
 
+terraform {
+  backend "s3" {
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/services/${local.service}/terraform.tfstate"
+
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt        = true
+  }
+}
+
 data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = var.db_remote_state_bucket
-    key    = var.db_remote_state_key
-    region = "us-east-1"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/data-stores/mysql/terraform.tfstate"
   }
 }
 
@@ -25,10 +41,10 @@ data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
-resource "aws_launch_configuration" "example" {
-  image_id        = "ami-0d5ae5525eb033d0a"
-  instance_type   = "t3.nano"
-  security_groups = [aws_security_group.instance.id]
+resource "aws_launch_configuration" "this" {
+  image_id        = local.ami
+  instance_type   = local.instance_type
+  security_groups = [aws_security_group.this.id]
 
   user_data = data.template_file.user_data.rendered
 
@@ -47,11 +63,11 @@ data "template_file" "user_data" {
   }
 }
 
-resource "aws_autoscaling_group" "example" {
-  launch_configuration = aws_launch_configuration.example.name
+resource "aws_autoscaling_group" "this" {
+  launch_configuration = aws_launch_configuration.this.name
   vpc_zone_identifier  = data.aws_subnet_ids.default.ids
 
-  target_group_arns = [aws_lb_target_group.asg.arn]
+  target_group_arns = [aws_lb_target_group.http.arn]
   health_check_type = "ELB"
 
   min_size = 2
@@ -59,36 +75,47 @@ resource "aws_autoscaling_group" "example" {
 
   tag {
     key                 = "Name"
-    value               = "terraform-example-asg"
+    value               = "${local.service}-asg"
     propagate_at_launch = true
   }
 }
 
-resource "aws_security_group" "instance" {
-  name = var.instance_security_group_name
+resource "aws_security_group" "this" {
+  name        = "${local.service}-sg"
+  description = "Allows HTTP traffic on port ${var.server_port} from the LB"
 
   ingress {
-    from_port   = var.server_port
-    to_port     = var.server_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = var.server_port
+    to_port         = var.server_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = {
+    Name    = "${local.service}-sg"
+    service = local.service
+  }
 }
 
-resource "aws_lb" "example" {
-  name = var.alb_name
+resource "aws_lb" "http" {
+  name = "${local.service}-alb"
 
   load_balancer_type = "application"
   subnets            = data.aws_subnet_ids.default.ids
   security_groups    = [aws_security_group.alb.id]
+
+  tags = {
+    Name    = "${local.service}-alb"
+    service = local.service
+  }
 }
 
-resource "aws_lb_target_group" "asg" {
-  name = var.alb_name
+resource "aws_lb_target_group" "http" {
+  name = "${local.service}-tg"
 
   port     = var.server_port
   protocol = "HTTP"
@@ -103,10 +130,15 @@ resource "aws_lb_target_group" "asg" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
   }
+
+  tags = {
+    Name    = "${local.service}-tg"
+    service = local.service
+  }
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.example.arn
+  load_balancer_arn = aws_lb.http.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -121,23 +153,25 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-resource "aws_lb_listener_rule" "asg" {
+resource "aws_lb_listener_rule" "http" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 100
 
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.asg.arn
+    target_group_arn = aws_lb_target_group.http.arn
   }
 }
 
 resource "aws_security_group" "alb" {
-  name = var.alb_security_group_name
+  name        = "${local.service}-alb-sg"
+  description = "Allows HTTP traffic on port 80 from all sources"
 
   ingress {
     from_port   = 80
@@ -151,5 +185,10 @@ resource "aws_security_group" "alb" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${local.service}-alb-sg"
+    service = local.service
   }
 }

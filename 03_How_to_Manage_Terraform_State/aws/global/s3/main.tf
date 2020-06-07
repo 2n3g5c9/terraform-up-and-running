@@ -1,3 +1,7 @@
+locals {
+  service = "terraform-up-and-running"
+}
+
 terraform {
   required_version = ">= 0.12, < 0.13"
 }
@@ -8,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.bucket_name
+  bucket = "2n3g5c9-${local.service}-state"
 
   versioning {
     enabled = true
@@ -25,10 +29,15 @@ resource "aws_s3_bucket" "terraform_state" {
       }
     }
   }
+
+  tags = {
+    Name    = "2n3g5c9-${local.service}-state"
+    service = local.service
+  }
 }
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = var.table_name
+  name         = "${local.service}-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
