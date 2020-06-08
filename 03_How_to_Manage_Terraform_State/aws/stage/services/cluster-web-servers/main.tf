@@ -16,8 +16,9 @@ provider "aws" {
 
 terraform {
   backend "s3" {
+    region = "us-east-1"
     bucket = "2n3g5c9-terraform-up-and-running-state"
-    key    = "stage/services/${local.service}/terraform.tfstate"
+    key    = "stage/services/cluster-web-servers/terraform.tfstate"
 
     dynamodb_table = "terraform-up-and-running-locks"
     encrypt        = true
@@ -28,6 +29,7 @@ data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
+    region = "us-east-1tf "
     bucket = "2n3g5c9-terraform-up-and-running-state"
     key    = "stage/data-stores/mysql/terraform.tfstate"
   }

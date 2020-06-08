@@ -15,6 +15,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
+    region = "us-east-1"
     bucket = "2n3g5c9-terraform-up-and-running-state"
     key    = "stage/data-stores/mysql/terraform.tfstate"
 
@@ -24,7 +25,7 @@ terraform {
 }
 
 resource "aws_db_instance" "this" {
-  identifier_prefix = local.service
+  identifier_prefix = "${local.service}-"
   engine            = "mysql"
   allocated_storage = 10
   instance_class    = local.instance_class
