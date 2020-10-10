@@ -5,7 +5,13 @@ locals {
   machine_type = "e2-micro"
 }
 
+terraform {
+  required_version = ">= 0.12, < 0.13"
+}
+
 provider "google" {
+  version = "~> 3.0"
+
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "us-east1-b"

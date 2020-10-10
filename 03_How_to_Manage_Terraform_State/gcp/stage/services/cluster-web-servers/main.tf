@@ -6,6 +6,8 @@ locals {
 }
 
 provider "google" {
+  version = "~> 3.0"
+
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "us-east1-b"

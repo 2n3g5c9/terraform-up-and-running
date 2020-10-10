@@ -4,7 +4,7 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
-  version = "~> 2.0"
+  version = "~> 3.0"
 }
 
 terraform {
@@ -17,6 +17,7 @@ terraform {
     encrypt        = true
   }
 }
+
 // You need to manually add a secret in AWS Secrets Manager named mysql-master-password-stage.
 data "aws_secretsmanager_secret_version" "db_password" {
   secret_id = "mysql-master-password-stage"
