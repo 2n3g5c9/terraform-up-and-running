@@ -12,7 +12,7 @@ provider "google" {
 }
 
 resource "google_compute_address" "this" {
-  name         = local.service
+  name        = local.service
   description = "IP address of the Load Balancer"
 
   address_type = "EXTERNAL"
@@ -34,7 +34,7 @@ resource "google_compute_instance" "this" {
 
     access_config {
       network_tier = "STANDARD"
-      nat_ip = google_compute_address.this.address
+      nat_ip       = google_compute_address.this.address
     }
   }
 
