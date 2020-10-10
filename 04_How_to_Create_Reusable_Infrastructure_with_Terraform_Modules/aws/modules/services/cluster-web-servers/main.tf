@@ -2,12 +2,17 @@ terraform {
   required_version = ">= 0.12, < 0.13"
 }
 
+provider "aws" {
+  region  = "us-east-1"
+  version = "~> 3.0"
+}
+
 data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = var.db_remote_state_bucket
-    key    = var.db_remote_state_key
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/data-stores/mysql/terraform.tfstate"
     region = "us-east-1"
   }
 }
@@ -60,7 +65,7 @@ resource "aws_autoscaling_group" "example" {
 }
 
 resource "aws_security_group" "instance" {
-  name = "${var.cluster_name}-instance"
+  name = "terraform-example-instance"
 
   ingress {
     from_port   = var.server_port
@@ -132,7 +137,7 @@ resource "aws_lb_listener_rule" "asg" {
 }
 
 resource "aws_security_group" "alb" {
-  name = "${var.cluster_name}-alb"
+  name = "terraform-example-alb"
 
   ingress {
     from_port   = 80
