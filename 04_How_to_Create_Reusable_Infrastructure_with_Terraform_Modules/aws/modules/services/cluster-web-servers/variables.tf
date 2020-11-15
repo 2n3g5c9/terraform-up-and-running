@@ -18,6 +18,21 @@ variable "db_remote_state_key" {
   type        = string
 }
 
+variable "instance_type" {
+  description = "The type of EC2 Instances to run (e.g. t3.nano)"
+  type = string
+}
+
+variable "max_size" {
+  description = "The maximum number of EC2 Instances in the ASG"
+  type = number
+}
+
+variable "min_size" {
+  description = "The minimum number of EC2 Instances in the ASG"
+  type = number
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.

@@ -1,5 +1,10 @@
 locals {
+  user    = "2n3g5c9"
   service = "terraform-up-and-running"
+
+
+  s3_bucket_name      = "${local.user}-${local.service}-state"
+  dynamodb_table_name = "${local.service}-locks"
 }
 
 terraform {
@@ -12,7 +17,8 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "2n3g5c9-${local.service}-state"
+  bucket = local.s3_bucket_name
+  acl    = "private"
 
   versioning {
     enabled = true
@@ -31,13 +37,13 @@ resource "aws_s3_bucket" "terraform_state" {
   }
 
   tags = {
-    Name    = "2n3g5c9-${local.service}-state"
+    Name    = local.s3_bucket_name
     service = local.service
   }
 }
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "${local.service}-locks"
+  name         = local.dynamodb_table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 

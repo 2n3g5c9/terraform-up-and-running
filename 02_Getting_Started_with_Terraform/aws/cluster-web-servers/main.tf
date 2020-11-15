@@ -1,7 +1,7 @@
 locals {
   service = "cluster-web-servers"
 
-  ami           = "ami-0e2512bd9da751ea8" // ubuntu 20.04 LTS
+  ami           = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
   instance_type = "t3.nano"
 }
 
