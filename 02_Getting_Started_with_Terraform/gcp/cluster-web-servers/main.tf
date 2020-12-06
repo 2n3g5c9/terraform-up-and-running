@@ -2,16 +2,21 @@ locals {
   service = "cluster-web-servers"
 
   image        = "ubuntu-os-cloud/ubuntu-2004-lts"
-  machine_type = "e2-micro"
+  machine_type = "f1-micro" // 1 vCPU for 20% / 0.6 GB
 }
 
 terraform {
-  required_version = ">= 0.12, < 0.13"
+  required_version = ">= 0.14, < 0.15"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "google" {
-  version = "~> 3.0"
-
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "us-east1-b"
@@ -45,7 +50,7 @@ resource "google_compute_instance_template" "this" {
 
 resource "google_compute_http_health_check" "this" {
   name        = "${local.service}-hc"
-  description = "Health checks on port 8080 of the instances in the group of web servers"
+  description = "Health checks on port ${var.server_port} of the instances in the group of web servers"
 
   request_path = "/"
   port         = var.server_port

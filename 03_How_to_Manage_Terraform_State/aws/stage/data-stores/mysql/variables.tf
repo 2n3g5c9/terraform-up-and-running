@@ -6,6 +6,12 @@
 variable "db_password" {
   description = "The password for the database."
   type        = string
+  sensitive = true
+
+  validation {
+    condition     = length(var.db_password) >= 8
+    error_message = "The database password must contain at least 8 characters."
+  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

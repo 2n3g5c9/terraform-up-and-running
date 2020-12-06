@@ -4,7 +4,7 @@
 
 <br />
 
-<div align="center">AWS & GCP examples from "Terraform: Up and Running" published by O'Reilly</div>
+<div align="center">AWS & GCP examples from "Terraform: Up and Running" published by O'Reilly, updated for 0.14</div>
 
 <br />
 
@@ -21,6 +21,12 @@ export GOOGLE_CLOUD_KEYFILE_JSON=./keyfile.json
 ```
 
 ## How to use
+
+To initialize the working directory:
+
+```bash
+terraform init
+```
 
 To preview incoming changes to the infrastructure, run the following command:
 

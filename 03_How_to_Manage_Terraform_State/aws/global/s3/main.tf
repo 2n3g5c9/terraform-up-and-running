@@ -2,18 +2,23 @@ locals {
   user    = "2n3g5c9"
   service = "terraform-up-and-running"
 
-
   s3_bucket_name      = "${local.user}-${local.service}-state"
   dynamodb_table_name = "${local.service}-locks"
 }
 
 terraform {
-  required_version = ">= 0.12, < 0.13"
+  required_version = ">= 0.14, < 0.15"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "aws" {
-  region  = "us-east-1"
-  version = "~> 3.0"
+  region = "us-east-1"
 }
 
 resource "aws_s3_bucket" "terraform_state" {

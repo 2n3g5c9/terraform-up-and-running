@@ -1,16 +1,21 @@
 locals {
-  db_tier = "db-f1-micro"
+  db_tier = "db-f1-micro" // Shared vCPUs / 0.6 GB / up to 3,062 GB
 
   service = "terraform-up-and-running"
 }
 
 terraform {
-  required_version = ">= 0.12, < 0.13"
+  required_version = ">= 0.14, < 0.15"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "google" {
-  version = "~> 3.0"
-
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "us-east1-b"
@@ -29,10 +34,10 @@ resource "random_id" "db_name_suffix" {
 
 resource "google_sql_database_instance" "this" {
   name             = "${local.service}-${random_id.db_name_suffix.hex}"
-  database_version = "MYSQL_5_7"
+  database_version = "MYSQL_8_0"
 
   settings {
-    tier = "db-f1-micro"
+    tier = local.db_tier
   }
 }
 
