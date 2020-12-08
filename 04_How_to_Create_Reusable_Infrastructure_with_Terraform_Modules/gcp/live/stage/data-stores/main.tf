@@ -2,7 +2,8 @@ locals {
   account = "2n3g5c9"
   project = "terraform-up-and-running"
   region  = "us-east1"
-  zone    = "${local.region}b"
+  zone    = "${local.region}-b"
+  env     = "stage"
 }
 
 terraform {
@@ -22,19 +23,16 @@ provider "google" {
   zone    = local.zone
 }
 
-resource "google_storage_bucket" "tf_state" {
-  name = "${local.account}-${local.project}-state"
-
-  location      = local.region
-  storage_class = "STANDARD"
-
-  versioning {
-    enabled = true
+terraform {
+  backend "gcs" {
+    bucket = "${local.account}-${local.project}-state"
+    prefix = "stage/data-stores/mysql/terraform.tfstate"
   }
+}
 
-  force_destroy = false
+module "mysql" {
+  source = "../../../../modules/data-stores/mysql"
 
-  labels = {
-    service = local.project
-  }
+  db_name     = "${local.project}-${local.env}"
+  db_password = var.db_password
 }

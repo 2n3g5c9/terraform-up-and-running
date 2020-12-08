@@ -1,3 +1,9 @@
+locals {
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
+}
+
 terraform {
   required_version = ">= 0.14, < 0.15"
 
@@ -10,11 +16,11 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "2n3g5c9-terraform-up-and-running-state"
+  bucket = "${local.account}-${local.project}-state"
 
   versioning {
     enabled = true
@@ -34,7 +40,7 @@ resource "aws_s3_bucket" "terraform_state" {
 }
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-up-and-running-locks"
+  name         = "${local.project}-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 

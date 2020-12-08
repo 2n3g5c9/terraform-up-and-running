@@ -1,3 +1,8 @@
+locals {
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
+}
+
 terraform {
   required_version = ">= 0.14, < 0.15"
 
@@ -10,7 +15,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 // You need to manually add a secret in AWS Secrets Manager.
@@ -19,7 +24,7 @@ data "aws_secretsmanager_secret_version" "db_password" {
 }
 
 resource "aws_db_instance" "example" {
-  identifier_prefix = "terraform-up-and-running"
+  identifier_prefix = local.project
   engine            = "mysql"
   allocated_storage = 10
   instance_class    = var.db_instance_type

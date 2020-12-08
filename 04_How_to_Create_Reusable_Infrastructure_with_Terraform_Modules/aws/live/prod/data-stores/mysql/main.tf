@@ -1,7 +1,12 @@
 locals {
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
+  env     = "prod"
+
   db_instance_type = "db.t3.micro" // 2 vCPUs / 1 GiB
-  db_name          = "example_database_prod"
-  db_secret_id     = "mysql-master-password-prod"
+  db_name          = "example_database_${local.env}"
+  db_secret_id     = "mysql-master-password-${local.env}"
 }
 
 terraform {
@@ -16,16 +21,16 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 terraform {
   backend "s3" {
-    bucket = "2n3g5c9-terraform-up-and-running-state"
-    key    = "prod/data-stores/mysql/terraform.tfstate"
-    region = "us-east-1"
+    bucket = "${local.account}-${local.project}-state"
+    key    = "${local.env}/data-stores/mysql/terraform.tfstate"
+    region = local.region
 
-    dynamodb_table = "terraform-up-and-running-locks"
+    dynamodb_table = "${local.project}-locks"
     encrypt        = true
   }
 }

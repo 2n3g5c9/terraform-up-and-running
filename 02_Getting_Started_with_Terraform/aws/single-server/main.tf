@@ -1,5 +1,6 @@
 locals {
   service = "single-server"
+  region  = "us-east-1"
 
   ami           = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
   instance_type = "t3a.nano"              // 2 vCPUs for a 1h 12m burst / 0.5 GiB
@@ -17,7 +18,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 resource "aws_instance" "this" {

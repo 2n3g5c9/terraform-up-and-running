@@ -1,4 +1,8 @@
 locals {
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
+
   ami = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
 
   http_port    = 80
@@ -20,16 +24,16 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = "2n3g5c9-terraform-up-and-running-state"
+    bucket = "${local.account}-${local.project}-state"
     key    = "stage/data-stores/mysql/terraform.tfstate"
-    region = "us-east-1"
+    region = local.region
   }
 }
 

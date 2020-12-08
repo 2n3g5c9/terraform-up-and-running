@@ -1,9 +1,10 @@
 locals {
-  user    = "2n3g5c9"
-  service = "terraform-up-and-running"
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
 
-  s3_bucket_name      = "${local.user}-${local.service}-state"
-  dynamodb_table_name = "${local.service}-locks"
+  s3_bucket_name      = "${local.account}-${local.project}-state"
+  dynamodb_table_name = "${local.project}-locks"
 }
 
 terraform {
@@ -18,7 +19,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 resource "aws_s3_bucket" "terraform_state" {
@@ -43,7 +44,7 @@ resource "aws_s3_bucket" "terraform_state" {
 
   tags = {
     Name    = local.s3_bucket_name
-    service = local.service
+    service = local.project
   }
 }
 

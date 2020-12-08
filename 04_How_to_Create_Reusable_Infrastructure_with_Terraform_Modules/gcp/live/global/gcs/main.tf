@@ -2,7 +2,7 @@ locals {
   account = "2n3g5c9"
   project = "terraform-up-and-running"
   region  = "us-east1"
-  zone    = "${local.region}b"
+  zone    = "${local.region}-b"
 }
 
 terraform {

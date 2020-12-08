@@ -1,4 +1,10 @@
 locals {
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east1"
+  zone    = "${local.region}b"
+  env     = "stage"
+
   service = "cluster-web-servers"
 
   image        = "ubuntu-os-cloud/ubuntu-2004-lts"
@@ -17,15 +23,15 @@ terraform {
 }
 
 provider "google" {
-  project = "terraform-up-and-running"
-  region  = "us-east1"
-  zone    = "us-east1-b"
+  project = local.project
+  region  = local.region
+  zone    = local.zone
 }
 
 terraform {
   backend "gcs" {
-    bucket = "2n3g5c9-terraform-up-and-running-state"
-    prefix = "stage/services/cluster-web-servers/terraform.tfstate"
+    bucket = "${local.account}-${local.project}-state"
+    prefix = "${local.env}/services/${local.service}/terraform.tfstate"
   }
 }
 
@@ -33,8 +39,8 @@ data "terraform_remote_state" "db" {
   backend = "gcs"
 
   config = {
-    bucket = "2n3g5c9-terraform-up-and-running-state"
-    prefix = "stage/data-stores/mysql/terraform.tfstate"
+    bucket = "${local.account}-${local.project}-state"
+    prefix = "${local.env}/data-stores/mysql/terraform.tfstate"
   }
 }
 
@@ -62,7 +68,7 @@ resource "google_compute_instance_template" "this" {
 
 resource "google_compute_http_health_check" "this" {
   name        = "${local.service}-hc"
-  description = "Health checks on port 8080 of the instances in the group of web servers"
+  description = "Health checks on port ${var.server_port} of the instances in the group of web servers"
 
   request_path = "/"
   port         = var.server_port

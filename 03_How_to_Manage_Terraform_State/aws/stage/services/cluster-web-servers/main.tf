@@ -1,4 +1,9 @@
 locals {
+  account = "2n3g5c9"
+  project = "terraform-up-and-running"
+  region  = "us-east-1"
+  env     = "stage"
+
   service = "cluster-web-servers"
 
   ami           = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
@@ -17,16 +22,16 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = local.region
 }
 
 terraform {
   backend "s3" {
-    region = "us-east-1"
-    bucket = "2n3g5c9-terraform-up-and-running-state"
-    key    = "stage/services/cluster-web-servers/terraform.tfstate"
+    region = local.region
+    bucket = "${local.account}-${local.project}-state"
+    key    = "${local.env}/services/${local.service}/terraform.tfstate"
 
-    dynamodb_table = "terraform-up-and-running-locks"
+    dynamodb_table = "${local.project}-locks"
     encrypt        = true
   }
 }
@@ -35,9 +40,9 @@ data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    region = "us-east-1"
-    bucket = "2n3g5c9-terraform-up-and-running-state"
-    key    = "stage/data-stores/mysql/terraform.tfstate"
+    region = local.region
+    bucket = "${local.account}-${local.project}-state"
+    key    = "${local.env}/data-stores/mysql/terraform.tfstate"
   }
 }
 

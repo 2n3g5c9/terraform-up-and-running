@@ -1,11 +1,6 @@
 locals {
-  account = "2n3g5c9"
   project = "terraform-up-and-running"
   region  = "us-east1"
-  zone    = "${local.region}b"
-  env     = "stage"
-
-  service = "mysql"
 }
 
 terraform {
@@ -20,16 +15,7 @@ terraform {
 }
 
 provider "google" {
-  project = local.project
-  region  = local.region
-  zone    = local.zone
-}
-
-terraform {
-  backend "gcs" {
-    bucket = "${local.account}-${local.project}-state"
-    prefix = "${local.env}/data-stores/${local.service}/terraform.tfstate"
-  }
+  region = local.region
 }
 
 resource "random_id" "db_name_suffix" {
