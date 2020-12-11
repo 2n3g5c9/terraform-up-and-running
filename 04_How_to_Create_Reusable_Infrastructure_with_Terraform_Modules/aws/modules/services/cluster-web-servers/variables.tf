@@ -3,6 +3,16 @@
 # You must provide a value for each of these parameters.
 # ---------------------------------------------------------------------------------------------------------------------
 
+variable "ami" {
+  description = "The base instance AMI."
+  type        = string
+
+  validation {
+    condition     = length(var.ami > 4 && substr(var.ami, 0, 4) == "ami-")
+    error_message = "The ami value must start with \"ami-\"."
+  }
+}
+
 variable "cluster_name" {
   description = "The name to use for all the cluster resources."
   type        = string
@@ -26,11 +36,21 @@ variable "instance_type" {
 variable "max_size" {
   description = "The maximum number of EC2 Instances in the ASG."
   type        = number
+
+  validation {
+    condition     = var.max_size <= 10
+    error_message = "The value of max_size should be no greater than 10."
+  }
 }
 
 variable "min_size" {
   description = "The minimum number of EC2 Instances in the ASG."
   type        = number
+
+  validation {
+    condition     = var.min_size > 0
+    error_message = "The value of min_size should be strictly positive."
+  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

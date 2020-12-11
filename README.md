@@ -11,7 +11,7 @@
 ## Prerequisites
 
 ### Amazon Web Services
-To run the AWS related examples in this repository, you need to have your AWS user credentials accessible locally, either in `~/.aws`, or through environment variables. 
+To run the AWS related examples in this repository, you need to have your AWS user credentials accessible locally, either in `~/.aws`, or via environment variables. 
 
 ### Google Cloud Platform
 To run the GCP related examples in the repository, you need to have a valid GCP keyfile for a service account with the right level of permissions. Specify the path to that keyfile via the environment variable `GOOGLE_CLOUD_KEYFILE_JSON`:

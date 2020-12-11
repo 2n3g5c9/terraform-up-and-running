@@ -1,9 +1,7 @@
 locals {
-  account = "2n3g5c9"
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "${local.region}b"
-  env     = "stage"
 
   service = "mysql"
 }
@@ -27,8 +25,8 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "${local.account}-${local.project}-state"
-    prefix = "${local.env}/data-stores/${local.service}/terraform.tfstate"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    prefix = "stage/data-stores/mysql/terraform.tfstate"
   }
 }
 
@@ -39,6 +37,8 @@ resource "random_id" "db_name_suffix" {
 resource "google_sql_database_instance" "this" {
   name             = "${local.project}-${random_id.db_name_suffix.hex}"
   database_version = var.db_version
+
+  deletion_protection = false
 
   settings {
     tier = var.db_tier

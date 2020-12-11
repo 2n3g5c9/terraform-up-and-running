@@ -27,11 +27,11 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    region = local.region
-    bucket = "${local.account}-${local.project}-state"
-    key    = "${local.env}/services/${local.service}/terraform.tfstate"
+    region = "us-east-1"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/services/cluster-web-servers/terraform.tfstate"
 
-    dynamodb_table = "${local.project}-locks"
+    dynamodb_table = "terraform-up-and-running-locks"
     encrypt        = true
   }
 }

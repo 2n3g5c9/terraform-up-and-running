@@ -6,7 +6,8 @@ locals {
 
   service = "cluster-web-servers"
 
-  instance_type = "t3a.nano" // 2 vCPUs for a 1h 12m burst / 0.5 GiB
+  ami           = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
+  instance_type = "t3a.nano"              // 2 vCPUs for a 1h 12m burst / 0.5 GiB
   min_size      = 2
   max_size      = 2
 }
@@ -28,11 +29,11 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "${local.account}-${local.project}-state"
-    key    = "${local.env}/services/${local.service}/terraform.tfstate"
-    region = local.region
+    region = "us-east-1"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    key    = "stage/services/cluster-web-servers/terraform.tfstate"
 
-    dynamodb_table = "${local.project}-locks"
+    dynamodb_table = "terraform-up-and-running-locks"
     encrypt        = true
   }
 }
@@ -44,6 +45,7 @@ module "cluster_web_servers" {
   db_remote_state_bucket = "${local.account}-${local.project}-state"
   db_remote_state_key    = "${local.env}/data-stores/mysql/terraform.tfstate"
 
+  ami           = local.ami
   instance_type = local.instance_type
   min_size      = local.min_size
   max_size      = local.max_size

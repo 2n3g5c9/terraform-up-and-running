@@ -1,5 +1,4 @@
 locals {
-  account = "2n3g5c9"
   project = "terraform-up-and-running"
   region  = "us-east1"
   zone    = "${local.region}-b"
@@ -25,13 +24,15 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "${local.account}-${local.project}-state"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
     prefix = "stage/data-stores/mysql/terraform.tfstate"
   }
 }
 
 module "mysql" {
   source = "../../../../modules/data-stores/mysql"
+
+  project = local.project
 
   db_name     = "${local.project}-${local.env}"
   db_password = var.db_password

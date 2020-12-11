@@ -17,3 +17,8 @@ variable "db_secret_id" {
   description = "The ID of the database secret, needs to be created manually."
   type        = string
 }
+
+variable "project" {
+  description = "The name of the project."
+  type        = string
+}

@@ -30,8 +30,8 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "${local.account}-${local.project}-state"
-    prefix = "${local.env}/services/${local.service}/terraform.tfstate"
+    bucket = "2n3g5c9-terraform-up-and-running-state"
+    prefix = "stage/services/cluster-web-servers/terraform.tfstate"
   }
 }
 

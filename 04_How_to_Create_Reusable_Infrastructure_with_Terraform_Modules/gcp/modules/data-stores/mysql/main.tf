@@ -1,30 +1,12 @@
-locals {
-  project = "terraform-up-and-running"
-  region  = "us-east1"
-}
-
-terraform {
-  required_version = ">= 0.14, < 0.15"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "google" {
-  region = local.region
-}
-
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
 
 resource "google_sql_database_instance" "this" {
-  name             = "${local.project}-${random_id.db_name_suffix.hex}"
+  name             = "${var.project}-${random_id.db_name_suffix.hex}"
   database_version = var.db_version
+
+  deletion_protection = false
 
   settings {
     tier = var.db_tier

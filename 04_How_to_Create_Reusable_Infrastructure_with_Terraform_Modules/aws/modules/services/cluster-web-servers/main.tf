@@ -1,10 +1,4 @@
 locals {
-  account = "2n3g5c9"
-  project = "terraform-up-and-running"
-  region  = "us-east-1"
-
-  ami = "ami-0885b1f6bd170450c" // ubuntu 20.04 LTS
-
   http_port    = 80
   any_port     = 0
   any_protocol = "-1"
@@ -12,28 +6,12 @@ locals {
   all_ips      = ["0.0.0.0/0"]
 }
 
-terraform {
-  required_version = ">= 0.14, < 0.15"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = local.region
-}
-
 data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = "${local.account}-${local.project}-state"
-    key    = "stage/data-stores/mysql/terraform.tfstate"
-    region = local.region
+    bucket = var.db_remote_state_bucket
+    key    = var.db_remote_state_key
   }
 }
 
@@ -46,7 +24,7 @@ data "aws_subnet_ids" "default" {
 }
 
 resource "aws_launch_configuration" "example" {
-  image_id        = local.ami
+  image_id        = var.ami
   instance_type   = var.instance_type
   security_groups = [aws_security_group.instance.id]
 

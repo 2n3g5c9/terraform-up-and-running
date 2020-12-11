@@ -19,6 +19,11 @@ variable "db_password" {
   }
 }
 
+variable "project" {
+  description = "The name of the project."
+  type        = string
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
