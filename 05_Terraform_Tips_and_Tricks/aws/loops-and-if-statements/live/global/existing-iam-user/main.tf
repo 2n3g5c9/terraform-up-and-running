@@ -17,6 +17,6 @@ provider "aws" {
   region = local.region
 }
 
-resource "aws_iam_user" "example" {
-  name = var.user_name
+resource "aws_iam_user" "existing_user" {
+  name = "marc.molina"
 }

@@ -15,8 +15,10 @@ terraform {
 
 provider "aws" {
   region = local.region
+
 }
 
 resource "aws_iam_user" "example" {
-  name = var.user_name
+  for_each = toset(var.user_names)
+  name     = each.value
 }

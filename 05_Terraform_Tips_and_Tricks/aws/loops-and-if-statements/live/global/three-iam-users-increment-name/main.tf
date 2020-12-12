@@ -18,5 +18,7 @@ provider "aws" {
 }
 
 resource "aws_iam_user" "example" {
-  name = var.user_name
+  count = 3
+
+  name = "${var.user_name_prefix}.${count.index}"
 }
