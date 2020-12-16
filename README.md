@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="512" src="https://raw.githubusercontent.com/2n3g5c9/terraform-up-and-running/master/img/terraform-up-and-running_banner.png" alt="terraform-up-and-running">
+  <img width="512" src="https://raw.githubusercontent.com/2n3g5c9/terraform-up-and-running/master/img/banner.png" alt="terraform-up-and-running">
 </div>
 
 <br />
