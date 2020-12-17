@@ -3,15 +3,14 @@
 # You must provide a value for each of these parameters.
 # ---------------------------------------------------------------------------------------------------------------------
 
-variable "db_password" {
-  description = "The password for the database."
+variable "db_remote_state_bucket" {
+  description = "The name of the S3 bucket used for the database's remote state storage"
   type        = string
-  sensitive   = true
+}
 
-  validation {
-    condition     = length(var.db_password) >= 8
-    error_message = "The database password must contain at least 8 characters."
-  }
+variable "db_remote_state_key" {
+  description = "The name of the key in the S3 bucket used for the database's remote state storage"
+  type        = string
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -19,8 +18,8 @@ variable "db_password" {
 # These parameters have reasonable defaults.
 # ---------------------------------------------------------------------------------------------------------------------
 
-variable "db_name" {
-  description = "The name to use for the database."
+variable "cluster_name" {
+  description = "The name to use to namespace all the resources in the cluster"
   type        = string
-  default     = "example_database_stage"
+  default     = "webservers-stage"
 }

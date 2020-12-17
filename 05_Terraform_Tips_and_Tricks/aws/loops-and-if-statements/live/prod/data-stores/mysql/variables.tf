@@ -6,7 +6,6 @@
 variable "db_password" {
   description = "The password for the database."
   type        = string
-  sensitive   = true
 
   validation {
     condition     = length(var.db_password) >= 8
@@ -22,5 +21,5 @@ variable "db_password" {
 variable "db_name" {
   description = "The name to use for the database."
   type        = string
-  default     = "example_database_stage"
+  default     = "example_database_prod"
 }
