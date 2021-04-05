@@ -2,13 +2,27 @@
   <img width="512" src="https://raw.githubusercontent.com/2n3g5c9/terraform-up-and-running/master/img/banner.png" alt="terraform-up-and-running">
 </div>
 
-<br />
+<p align="center">
+    <a href="#-code-quick-access">Code quick access</a>
+    &nbsp; • &nbsp;
+    <a href="#-prerequisites">Prerequisites</a>
+    &nbsp; • &nbsp;
+    <a href="#-how-to-use">How to use</a>
+    &nbsp; • &nbsp;
+    <a href="#-techframeworks-used">Tech/frameworks used</a>
+    &nbsp; • &nbsp;
+    <a href="#-license">License</a>
+</p>
 
-<div align="center">AWS & GCP examples from "Terraform: Up and Running" published by O'Reilly, adapted for v0.14</div>
+<p align="center">
+    <img src="https://img.shields.io/github/languages/count/2n3g5c9/terraform-up-and-running.svg?style=flat" alt="languages-badge"/>
+    <img src="https://img.shields.io/github/license/2n3g5c9/terraform-up-and-running" alt="license-badge">
+    <img src="https://img.shields.io/github/repo-size/2n3g5c9/terraform-up-and-running" alt="repo-size-badge">
+    <img src="https://img.shields.io/github/last-commit/2n3g5c9/terraform-up-and-running" alt="last-commit-badge">
+    <img src="https://img.shields.io/github/issues-raw/2n3g5c9/terraform-up-and-running" alt="open-issues-badge">
+</p>
 
-<br />
-
-## Code quick access
+## 🚀 Code quick access
 
 [Chapter 2 - Getting Started with Terraform](./02_Getting_Started_with_Terraform)
 
@@ -18,7 +32,7 @@
 
 [Chapter 5 - Terraform Tips and Tricks](./05_Terraform_Tips_and_Tricks)
 
-## Prerequisites
+## ✅ Prerequisites
 
 ### Amazon Web Services
 To run the AWS related examples in this repository, you need to have your AWS credentials accessible locally, either in `~/.aws`, or via environment variables. You can also use [aws-vault](https://github.com/99designs/aws-vault) to generate temporary crendentials.
@@ -30,7 +44,7 @@ To run the GCP related examples in the repository, you need to have a valid GCP 
 export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
 ```
 
-## How to use
+## 🤨 How to use
 
 To initialize the working directory:
 
@@ -56,10 +70,10 @@ To destroy the provisioned infrastructure, run the following command:
 terraform destroy
 ```
 
-## Tech/frameworks used
+## 🪄 Tech/frameworks used
 
 - [Terraform](https://www.terraform.io/): A tool to "Write, Plan, and Create Infrastructure as Code".
 
-## License
+## 📃 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
